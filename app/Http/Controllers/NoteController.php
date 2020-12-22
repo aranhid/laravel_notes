@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Note;
 use Auth;
+use App\Models\Note;
+use App\Providers\NoteChanged;
 
 class NoteController extends Controller
 {
@@ -87,12 +88,16 @@ class NoteController extends Controller
             'text' => 'required',
         ]);
 
+        $oldNote = clone $note;
+
         $note->update($request->all());
 
         session([
             'title' => '',
             'text' => '',
         ]);
+
+        event(new NoteChanged($oldNote, $note));
 
         return redirect()->route('home');
     }
